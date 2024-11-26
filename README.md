@@ -13,73 +13,40 @@ This Laravel application is developed using Sail. Follow the instructions below 
 
     ```bash
     git clone git@github.com:JenyaMelnik/DanceStar.git
-    cd <your project folder>
+    ```
+    ```bash
+    cd DanceStar
     ```
 
-2. **Copy `.env.example` to `.env`:**
+
+2. **Execute the ‘make’ command to deploy the project:**
 
     ```bash
-    cp .env.example .env
+    make deploy
     ```
 
-3. **Configure the `.env` file:**
-
-    In the `.env` file, set the following parameters for database connection:
-
-    ```env
-    DB_CONNECTION=mysql
-    DB_HOST=mysql
-    DB_PORT=3306
-    DB_DATABASE=your_database_name
-    DB_USERNAME=your_username
-    DB_PASSWORD=your_password
-    ```
-
-    **Note:** Sail automatically creates a `mysql` container, so the host (`DB_HOST`) should be set to `mysql`.
-
-4. **Start Sail and install dependencies:**
+3. **On most systems, ‘make’ is pre-installed. To check this, run:**
 
     ```bash
-    ./vendor/bin/sail up -d
-    ./vendor/bin/sail composer install
-    ./vendor/bin/sail npm install
+    make --version
     ```
-
-5. **Generate the application key:**
+4.  **If the command is not available, install ‘make’:<br>**
+    **For Ubuntu/Debian:**
 
     ```bash
-    ./vendor/bin/sail artisan key:generate
+    sudo apt update && sudo apt install make
     ```
 
-6. **Create the database:**
-
-    Open the MySQL container:
+    **For MacOS:**
 
     ```bash
-    ./vendor/bin/sail mysql
+    xcode-select --install
     ```
 
-    Then run the following command to create the database (if it doesn't already exist):
+    **On Windows: Install ‘Make’ for Windows or use WSL.**
 
-    ```sql
-    CREATE DATABASE your_database_name;
-    ```
 
-7. **Run migrations:**
-
-    ```bash
-    ./vendor/bin/sail artisan migrate
-    ```
-
-## Running the Application
-
-1. **Start the application:**
-
-    ```bash
-    ./vendor/bin/sail up
-    ```
-
-2. Open [http://localhost](http://localhost) in your browser to view the application.
+5. Open [http://localhost](http://localhost) in your browser to view the application.
 
 ## Useful Commands
 
