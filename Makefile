@@ -10,9 +10,9 @@ DB_CONNECTION=mysql
 deploy:
 	@echo "Starting deployment process..."
 	make copy-env
-	./vendor/bin/sail up -d
+	docker compose up -d
 	@echo "Installing dependencies..."
-	./vendor/bin/sail composer install
+	docker exec -it dancestar-laravel.test-1 composer install
 	./vendor/bin/sail npm install
 	@echo "Generating application key..."
 	./vendor/bin/sail artisan key:generate
