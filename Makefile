@@ -27,12 +27,22 @@ copy-env:
 	@echo "Copying .env.example to .env..."
 	cp -n .env.example .env
 	@echo "Configuring database in .env..."
-	sed -i '' "s/^DB_CONNECTION=.*/DB_CONNECTION=$(DB_CONNECTION)/" .env
-	sed -i '' "s/^DB_HOST=.*/DB_HOST=$(DB_HOST)/" .env
-	sed -i '' "s/^DB_PORT=.*/DB_PORT=$(DB_PORT)/" .env
-	sed -i '' "s/^DB_DATABASE=.*/DB_DATABASE=$(DB_NAME)/" .env
-	sed -i '' "s/^DB_USERNAME=.*/DB_USERNAME=$(DB_USER)/" .env
-	sed -i '' "s/^DB_PASSWORD=.*/DB_PASSWORD=$(DB_PASSWORD)/" .env
+	# Определение операционной системы для корректной работы sed
+	@if [ "$(shell uname)" = "Darwin" ]; then \
+		sed -i '' "s/^DB_CONNECTION=.*/DB_CONNECTION=$(DB_CONNECTION)/" .env; \
+		sed -i '' "s/^DB_HOST=.*/DB_HOST=$(DB_HOST)/" .env; \
+		sed -i '' "s/^DB_PORT=.*/DB_PORT=$(DB_PORT)/" .env; \
+		sed -i '' "s/^DB_DATABASE=.*/DB_DATABASE=$(DB_NAME)/" .env; \
+		sed -i '' "s/^DB_USERNAME=.*/DB_USERNAME=$(DB_USER)/" .env; \
+		sed -i '' "s/^DB_PASSWORD=.*/DB_PASSWORD=$(DB_PASSWORD)/" .env; \
+	else \
+		sed -i "s/^DB_CONNECTION=.*/DB_CONNECTION=$(DB_CONNECTION)/" .env; \
+		sed -i "s/^DB_HOST=.*/DB_HOST=$(DB_HOST)/" .env; \
+		sed -i "s/^DB_PORT=.*/DB_PORT=$(DB_PORT)/" .env; \
+		sed -i "s/^DB_DATABASE=.*/DB_DATABASE=$(DB_NAME)/" .env; \
+		sed -i "s/^DB_USERNAME=.*/DB_USERNAME=$(DB_USER)/" .env; \
+		sed -i "s/^DB_PASSWORD=.*/DB_PASSWORD=$(DB_PASSWORD)/" .env; \
+	fi
 	@echo ".env file configured."
 
 # Database creation
