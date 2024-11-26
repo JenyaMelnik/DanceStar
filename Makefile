@@ -27,7 +27,7 @@ copy-env:
 	@echo "Copying .env.example to .env..."
 	cp -n .env.example .env
 	@echo "Configuring database in .env..."
-	# Определение операционной системы для корректной работы sed
+	# Defining the operating system for the correct operation of 'sed'
 	@if [ "$(shell uname)" = "Darwin" ]; then \
 		sed -i '' "s/^DB_CONNECTION=.*/DB_CONNECTION=$(DB_CONNECTION)/" .env; \
 		sed -i '' "s/^DB_HOST=.*/DB_HOST=$(DB_HOST)/" .env; \
