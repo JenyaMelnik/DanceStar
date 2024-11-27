@@ -48,5 +48,5 @@ copy-env:
 # Database creation
 create-database:
 	@echo "Creating database $(DB_NAME)..."
-	./vendor/bin/sail exec mysql mysql -uroot -proot -e "CREATE DATABASE IF NOT EXISTS $(DB_NAME);"
+	./vendor/bin/sail exec mysql mysql -usail -ppassword -e "CREATE DATABASE IF NOT EXISTS $(DB_NAME);"
 	@echo "Database $(DB_NAME) created (or already exists)."
