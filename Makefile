@@ -13,6 +13,8 @@ deploy:
 	docker compose up -d
 	@echo "Installing dependencies..."
 	docker exec -it dancestar-laravel.test-1 composer install
+	docker compose down
+	./vendor/bin/sail up -d
 	./vendor/bin/sail npm install
 	@echo "Generating application key..."
 	./vendor/bin/sail artisan key:generate
