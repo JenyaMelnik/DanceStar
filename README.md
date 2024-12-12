@@ -25,28 +25,8 @@ This Laravel application is developed using Sail. Follow the instructions below 
     make deploy
     ```
 
-3. **On most systems, ‘make’ is pre-installed. To check this, run:**
 
-    ```bash
-    make --version
-    ```
-4.  **If the command is not available, install ‘make’:<br>**
-    **For Ubuntu/Debian:**
-
-    ```bash
-    sudo apt update && sudo apt install make
-    ```
-
-    **For MacOS:**
-
-    ```bash
-    xcode-select --install
-    ```
-
-    **On Windows: Install ‘Make’ for Windows or use WSL.**
-
-
-5. Open [http://localhost](http://localhost) in your browser to view the application.
+3. Open [http://localhost](http://localhost) in your browser to view the application.
 
 ## Useful Commands
 
