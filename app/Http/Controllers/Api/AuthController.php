@@ -9,10 +9,7 @@ use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
 {
-    /**
-     * @return JsonResponse
-     */
-    public function login(Request $request)
+    public function login(Request $request): JsonResponse
     {
         $credentials = $request->validate([
             'email' => 'required|email',
@@ -28,30 +25,21 @@ class AuthController extends Controller
         return $this->respondWithToken($token);
     }
 
-    /**
-     * @return JsonResponse
-     */
-    public function logout()
+    public function logout(): JsonResponse
     {
         Auth::guard('api')->logout();
 
         return response()->json(['message' => 'Logged out']);
     }
 
-    /**
-     * @return JsonResponse
-     */
-    public function refresh()
+    public function refresh(): JsonResponse
     {
         return $this->respondWithToken(
             Auth::guard('api')->refresh()
         );
     }
 
-    /**
-     * @return JsonResponse
-     */
-    protected function respondWithToken($token)
+    protected function respondWithToken($token): JsonResponse
     {
         return response()->json([
             'access_token' => $token,
