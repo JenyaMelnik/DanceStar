@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Route;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class AuthenticationTest extends TestCase
@@ -34,9 +35,7 @@ class AuthenticationTest extends TestCase
         parent::tearDown();
     }
 
-    /**
-     * Test case 2.1: Logged in user can access protected route /test
-     */
+    #[test]
     public function test_logged_in_user_can_access_protected_route(): void
     {
         // Login and get token
@@ -57,9 +56,7 @@ class AuthenticationTest extends TestCase
         $response->assertJson(['message' => 'Hello world']);
     }
 
-    /**
-     * Test case 2.2: Non-authenticated user gets 401 on protected route /test
-     */
+    #[test]
     public function test_non_authenticated_user_gets_401_on_protected_route(): void
     {
         $response = $this->getJson('/api/test');
@@ -67,9 +64,7 @@ class AuthenticationTest extends TestCase
         $response->assertStatus(401);
     }
 
-    /**
-     * Test case 2.3: User after logout gets 401 on protected route /test
-     */
+    #[test]
     public function test_user_after_logout_gets_401_on_protected_route(): void
     {
         // Login and get token
@@ -95,9 +90,7 @@ class AuthenticationTest extends TestCase
         $response->assertStatus(401);
     }
 
-    /**
-     * Test case 2.4: User after refresh can access protected route /test
-     */
+    #[test]
     public function test_user_after_refresh_can_access_protected_route(): void
     {
         // Login and get token
