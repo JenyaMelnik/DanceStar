@@ -1,29 +1,28 @@
 <?php
 
-namespace App\Http\Controllers\Api;
+namespace App\Domains\Auth\Http\Controllers;
 
-use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
-class AuthController extends Controller
+class AuthController
 {
-    public function login(Request $request): JsonResponse
-    {
-        $credentials = $request->validate([
-            'email' => 'required|email',
-            'password' => 'required',
-        ]);
-
-        if (! $token = Auth::guard('api')->attempt($credentials)) {
-            return response()->json([
-                'error' => 'Unauthorized',
-            ], 401);
-        }
-
-        return $this->respondWithToken($token);
-    }
+//    public function login(Request $request): JsonResponse
+//    {
+//        $credentials = $request->validate([
+//            'email' => 'required|email',
+//            'password' => 'required',
+//        ]);
+//
+//        if (! $token = Auth::guard('api')->attempt($credentials)) {
+//            return response()->json([
+//                'error' => 'Unauthorized',
+//            ], 401);
+//        }
+//
+//        return $this->respondWithToken($token);
+//    }
 
     public function logout(): JsonResponse
     {
