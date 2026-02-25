@@ -11,16 +11,15 @@ use App\Domains\Auth\Services\LoginService;
 class LoginController
 {
     public function __construct(
-       private LoginService $loginService,
-    ) {
-    }
+        private LoginService $loginService,
+    ) {}
 
     public function __invoke(LoginRequest $request): UnauthorizedResource|TokenResource
     {
         try {
             $tokenDto = $this->loginService->login($request->getDTO());
         } catch (TokenNotFoundException) {
-            return new UnauthorizedResource();
+            return new UnauthorizedResource;
         }
 
         return new TokenResource($tokenDto);

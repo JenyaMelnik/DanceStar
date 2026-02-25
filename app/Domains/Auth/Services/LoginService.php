@@ -14,8 +14,8 @@ class LoginService
     public function login(LoginDto $getDTO): TokenDto
     {
         /** @var string|null $token */
-        if (!$token = Auth::guard('api')->attempt($getDTO->toArray())) {
-            throw new TokenNotFoundException();
+        if (! $token = Auth::guard('api')->attempt($getDTO->toArray())) {
+            throw new TokenNotFoundException;
         }
 
         /** @var int $expiresIn */

@@ -2,11 +2,9 @@
 
 namespace App\Application\Http\Resources;
 
-use App\Domains\Auth\DTO\TokenDto;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
-use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
 
 class UnauthorizedResource extends JsonResource
@@ -28,6 +26,6 @@ class UnauthorizedResource extends JsonResource
 
     public function withResponse(Request $request, JsonResponse $response): void
     {
-        $response->setStatusCode( Response::HTTP_UNAUTHORIZED );
+        $response->setStatusCode(Response::HTTP_UNAUTHORIZED);
     }
 }

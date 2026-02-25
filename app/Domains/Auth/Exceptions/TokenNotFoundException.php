@@ -6,6 +6,4 @@ namespace App\Domains\Auth\Exceptions;
 
 use DomainException;
 
-class TokenNotFoundException extends DomainException
-{
-}
+class TokenNotFoundException extends DomainException {}
