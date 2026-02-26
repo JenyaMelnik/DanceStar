@@ -3,14 +3,14 @@
 namespace Tests\Feature;
 
 use App\Domains\User\Models\User;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\Route;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class AuthenticationTest extends TestCase
 {
-    use RefreshDatabase;
+    use DatabaseTransactions;
 
     private User $user;
 

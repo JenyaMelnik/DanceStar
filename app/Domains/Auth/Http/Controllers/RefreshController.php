@@ -11,10 +11,10 @@ use App\Domains\Auth\Services\RefreshService;
 class RefreshController
 {
     public function __construct(
-        private RefreshService $refreshService,
+        private readonly RefreshService $refreshService,
     ) {}
 
-    public function __invoke(RefreshRequest $request): UnauthorizedResource|TokenResource
+    public function __invoke(): UnauthorizedResource|TokenResource
     {
         try {
             $refreshedTokenDto = $this->refreshService->refresh();
