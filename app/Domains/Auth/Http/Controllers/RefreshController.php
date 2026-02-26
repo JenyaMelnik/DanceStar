@@ -4,7 +4,7 @@ namespace App\Domains\Auth\Http\Controllers;
 
 use App\Application\Http\Resources\UnauthorizedResource;
 use App\Domains\Auth\Exceptions\TokenNotFoundException;
-use App\Domains\Auth\Http\Requests\LoginRequest;
+use App\Domains\Auth\Http\Requests\RefreshRequest;
 use App\Domains\Auth\Http\Resources\TokenResource;
 use App\Domains\Auth\Services\RefreshService;
 
@@ -14,7 +14,7 @@ class RefreshController
         private RefreshService $refreshService,
     ) {}
 
-    public function __invoke(LoginRequest $request): UnauthorizedResource|TokenResource
+    public function __invoke(RefreshRequest $request): UnauthorizedResource|TokenResource
     {
         try {
             $refreshedTokenDto = $this->refreshService->refresh();
