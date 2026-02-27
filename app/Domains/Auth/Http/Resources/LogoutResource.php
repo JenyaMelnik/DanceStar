@@ -7,6 +7,10 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 class LogoutResource extends JsonResource
 {
+    public function __construct()
+    {
+        parent::__construct(null);
+    }
     public function toArray(Request $request): array
     {
         return [
