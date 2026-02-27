@@ -15,6 +15,6 @@ class LogoutController
     {
         $this->logoutService->logout();
 
-        return new LogoutResource();
+        return new LogoutResource;
     }
 }

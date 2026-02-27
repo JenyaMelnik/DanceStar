@@ -11,6 +11,7 @@ class LogoutResource extends JsonResource
     {
         parent::__construct(null);
     }
+
     public function toArray(Request $request): array
     {
         return [

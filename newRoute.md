@@ -603,7 +603,7 @@ class DeleteUserController
     {
         $this->userService->deleteUser($user);
         
-        return new DeleteUserResource();
+        return new DeleteUserResource;
     }
 }
 ```

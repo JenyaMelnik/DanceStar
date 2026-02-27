@@ -4,7 +4,6 @@ namespace App\Domains\Auth\Http\Controllers;
 
 use App\Application\Http\Resources\UnauthorizedResource;
 use App\Domains\Auth\Exceptions\TokenNotFoundException;
-use App\Domains\Auth\Http\Requests\RefreshRequest;
 use App\Domains\Auth\Http\Resources\TokenResource;
 use App\Domains\Auth\Services\RefreshService;
 
