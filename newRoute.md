@@ -128,6 +128,7 @@ use App\Domains\User\DTO\UserDto;
 use App\Domains\User\DTO\CreateUserDto;
 use App\Domains\User\Models\User;
 use App\Domains\User\Exceptions\UserNotFoundException;
+use Illuminate\Support\Facades\DB;
 
 class UserService
 {
@@ -152,25 +153,31 @@ class UserService
 
     public function createUser(CreateUserDto $dto): User
     {
-        if ($this->userRepository->findByEmail($dto->email)) {
-            throw new \Exception('User with this email already exists');
-        }
+        return DB::transaction(function () use ($dto) {
+            if ($this->userRepository->findByEmail($dto->email)) {
+                throw new \Exception('User with this email already exists');
+            }
 
-        return $this->userRepository->create([
-            'name' => $dto->name,
-            'email' => $dto->email,
-            'password' => $dto->password,
-        ]);
+            return $this->userRepository->create([
+                'name' => $dto->name,
+                'email' => $dto->email,
+                'password' => $dto->password,
+            ]);
+        });
     }
 
     public function updateUser(User $user, array $data): User
     {
-        return $this->userRepository->update($user, $data);
+        return DB::transaction(function () use ($user, $data) {
+            return $this->userRepository->update($user, $data);
+        });
     }
 
     public function deleteUser(User $user): bool
     {
-        return $this->userRepository->delete($user);
+        return DB::transaction(function () use ($user) {
+            return $this->userRepository->delete($user);
+        });
     }
 }
 ```
