@@ -1,5 +1,5 @@
 services:
-    laravel.test:
+    php:
         build:
             context: './.docker/runtimes/8.3'
             dockerfile: Dockerfile

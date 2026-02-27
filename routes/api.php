@@ -1,8 +1,13 @@
 <?php
 
-use Illuminate\Http\Request;
+use App\Domains\Auth\Http\Controllers\LoginController;
+use App\Domains\Auth\Http\Controllers\LogoutController;
+use App\Domains\Auth\Http\Controllers\RefreshController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/user', function (Request $request) {
-    return $request->user();
-})->middleware('auth:sanctum');
+Route::post('/login', LoginController::class);
+
+Route::middleware('auth:api')->group(function () {
+    Route::post('/logout', LogoutController::class);
+    Route::post('/refresh', RefreshController::class);
+});
