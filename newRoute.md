@@ -126,7 +126,6 @@ namespace App\Domains\User\Services;
 use App\Domains\User\Repositories\UserRepositoryInterface;
 use App\Domains\User\DTO\UserDto;
 use App\Domains\User\DTO\CreateUserDto;
-use App\Domains\User\DTO\GetUserDto;
 use App\Domains\User\Models\User;
 use App\Domains\User\Exceptions\UserNotFoundException;
 
@@ -136,9 +135,9 @@ class UserService
         private readonly UserRepositoryInterface $userRepository
     ) {}
 
-    public function getUserById(GetUserDto $dto): UserDto
+    public function getUserById(int $id): UserDto
     {
-        $user = $this->userRepository->findById($dto->id);
+        $user = $this->userRepository->findById($id);
         
         if (!$user) {
             throw new UserNotFoundException();
@@ -237,61 +236,6 @@ class ApplicationServiceProvider extends ServiceProvider
 
 ### GET:
 
-**Request класс:**
-```php
-<?php
-// app/Domains/User/Http/Requests/GetUserRequest.php
-namespace App\Domains\User\Http\Requests;
-
-use App\Domains\User\DTO\GetUserDto;
-use Illuminate\Foundation\Http\FormRequest;
-
-class GetUserRequest extends FormRequest
-{
-    public function authorize(): bool
-    {
-        return true;
-    }
-
-    public function rules(): array
-    {
-        return [
-            'id' => ['required', 'integer', 'exists:users,id']
-        ];
-    }
-
-    public function getDTO(): GetUserDto
-    {
-        return new GetUserDto(
-            id: $this->validated('id')
-        );
-    }
-}
-```
-
-**DTO класс:**
-```php
-<?php
-// app/Domains/User/DTO/GetUserDto.php
-namespace App\Domains\User\DTO;
-
-declare(strict_types=1);
-
-readonly class GetUserDto
-{
-    public function __construct(
-        public int $id,
-    ) {}
-
-    public function toArray(): array
-    {
-        return [
-            'id' => $this->id,
-        ];
-    }
-}
-```
-
 **Controller:**
 ```php
 <?php
@@ -299,9 +243,9 @@ readonly class GetUserDto
 namespace App\Domains\User\Http\Controllers;
 
 use App\Application\Http\Resources\NotFoundResource;
-use App\Domains\User\Http\Requests\GetUserRequest;
 use App\Domains\User\Http\Resources\UserResource;
 use App\Domains\User\Services\UserService;
+use App\Domains\User\Models\User;
 use App\Domains\User\Exceptions\UserNotFoundException;
 
 class GetUserController
@@ -310,10 +254,10 @@ class GetUserController
         private readonly UserService $userService
     ) {}
 
-    public function __invoke(GetUserRequest $request): UserResource|NotFoundResource
+    public function __invoke(User $user): UserResource|NotFoundResource
     {
         try {
-            $userDto = $this->userService->getUserById($request->getDTO());
+            $userDto = $this->userService->getUserById($user->id);
             return new UserResource((object) [
                 'id' => $userDto->id,
                 'name' => $userDto->name,
