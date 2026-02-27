@@ -570,6 +570,10 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 class DeleteUserResource extends JsonResource
 {
+    public function __construct()
+    {
+        parent::__construct(null);
+    }
     public function toArray(Request $request): array
     {
         return [
@@ -599,7 +603,7 @@ class DeleteUserController
     {
         $this->userService->deleteUser($user);
         
-        return new DeleteUserResource(null);
+        return new DeleteUserResource();
     }
 }
 ```
