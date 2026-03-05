@@ -636,3 +636,433 @@ Route::delete('/users/{user}', DeleteUserController::class);
 8. **Controller** создает Resource из результата
 9. **Resource** форматирует ответ в JSON
 10. **HTTP Response** отправляется клиенту
+
+---
+
+# Авторизация в Laravel
+
+### Что такое авторизация:
+Авторизация - это процесс проверки прав доступа аутентифицированного пользователя к определенным ресурсам или действиям.
+
+### Встроенные механизмы авторизации в Laravel:
+
+#### 1. Gates (Шлюзы)
+Gates - это простые замыкания, которые определяют, может ли пользователь выполнить определенное действие.
+
+**Создание AuthServiceProvider:**
+```php
+<?php
+// app/Providers/AuthServiceProvider.php
+namespace App\Providers;
+
+use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
+use Illuminate\Support\Facades\Gate;
+use App\Domains\User\Models\User;
+
+class AuthServiceProvider extends ServiceProvider
+{
+    protected $policies = [
+        // 'App\Models\Model' => 'App\Policies\ModelPolicy',
+    ];
+
+    public function boot(): void
+    {
+        $this->registerPolicies();
+
+        // Определение Gates
+        Gate::define('update-user', function (User $user, User $targetUser) {
+            return $user->id === $targetUser->id;
+        });
+
+        Gate::define('delete-user', function (User $user) {
+            return $user->email === 'admin@example.com';
+        });
+
+        Gate::define('view-admin-panel', function (User $user) {
+            return $user->role === 'admin';
+        });
+    }
+}
+```
+
+**Регистрация в config/app.php:**
+```php
+'providers' => [
+    // ...
+    App\Providers\AuthServiceProvider::class,
+],
+```
+
+**Использование Gates в контроллерах:**
+```php
+<?php
+// app/Domains/User/Http/Controllers/UpdateUserController.php
+namespace App\Domains\User\Http\Controllers;
+
+use App\Domains\User\Http\Requests\UpdateUserRequest;
+use App\Domains\User\Http\Resources\UserResource;
+use App\Domains\User\Services\UserService;
+use App\Domains\User\Models\User;
+use Illuminate\Support\Facades\Gate;
+use App\Application\Http\Resources\UnauthorizedResource;
+
+class UpdateUserController
+{
+    public function __construct(
+        private readonly UserService $userService
+    ) {}
+
+    public function __invoke(UpdateUserRequest $request, User $user): UserResource|UnauthorizedResource
+    {
+        // Проверка через Gate
+        if (!Gate::allows('update-user', $user)) {
+            return new UnauthorizedResource;
+        }
+
+        $updatedUser = $this->userService->updateUser($user, $request->validated());
+        
+        return new UserResource($updatedUser);
+    }
+}
+```
+
+**Использование Gates в Request классах:**
+```php
+<?php
+// app/Domains/User/Http/Requests/UpdateUserRequest.php
+namespace App\Domains\User\Http\Requests;
+
+use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Gate;
+use App\Domains\User\Models\User;
+
+class UpdateUserRequest extends FormRequest
+{
+    public function authorize(): bool
+    {
+        // Проверка авторизации через Gate
+        return Gate::allows('update-user', $this->user);
+    }
+
+    public function rules(): array
+    {
+        return [
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'email', 'unique:users,email,' . $this->user->id],
+        ];
+    }
+}
+```
+
+#### 2. Policies (Политики)
+Policies - это классы, которые организуют логику авторизации для конкретной модели.
+
+**Создание Policy:**
+```bash
+php artisan make:policy UserPolicy --model=User
+```
+
+**Реализация Policy:**
+```php
+<?php
+// app/Domains/User/Policies/UserPolicy.php
+namespace App\Domains\User\Policies;
+
+use App\Domains\User\Models\User;
+use Illuminate\Auth\Access\Response;
+
+class UserPolicy
+{
+    public function viewAny(User $user): bool
+    {
+        return true; // Все пользователи могут просматривать список пользователей
+    }
+
+    public function view(User $user, User $model): bool
+    {
+        return $user->id === $model->id || $user->role === 'admin';
+    }
+
+    public function create(User $user): bool
+    {
+        return $user->role === 'admin';
+    }
+
+    public function update(User $user, User $model): bool
+    {
+        return $user->id === $model->id || $user->role === 'admin';
+    }
+
+    public function delete(User $user, User $model): bool
+    {
+        return $user->role === 'admin' && $user->id !== $model->id;
+    }
+
+    public function restore(User $user, User $model): bool
+    {
+        return $user->role === 'admin';
+    }
+
+    public function forceDelete(User $user, User $model): bool
+    {
+        return $user->role === 'super_admin';
+    }
+}
+```
+
+**Регистрация Policy в AuthServiceProvider:**
+```php
+<?php
+// app/Providers/AuthServiceProvider.php
+namespace App\Providers;
+
+use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
+use App\Domains\User\Models\User;
+use App\Domains\User\Policies\UserPolicy;
+
+class AuthServiceProvider extends ServiceProvider
+{
+    protected $policies = [
+        User::class => UserPolicy::class,
+    ];
+
+    public function boot(): void
+    {
+        $this->registerPolicies();
+    }
+}
+```
+
+**Использование Policy в контроллере:**
+```php
+<?php
+// app/Domains/User/Http/Controllers/DeleteUserController.php
+namespace App\Domains\User\Http\Controllers;
+
+use App\Domains\User\Http\Resources\DeleteUserResource;
+use App\Domains\User\Services\UserService;
+use App\Domains\User\Models\User;
+use App\Application\Http\Resources\UnauthorizedResource;
+use Illuminate\Auth\Access\AuthorizationException;
+
+class DeleteUserController
+{
+    public function __construct(
+        private readonly UserService $userService
+    ) {}
+
+    public function __invoke(User $user): DeleteUserResource|UnauthorizedResource
+    {
+        try {
+            // Автоматическая проверка через Policy (метод delete)
+            $this->authorize('delete', $user);
+            
+            $this->userService->deleteUser($user);
+            
+            return new DeleteUserResource;
+        } catch (AuthorizationException) {
+            return new UnauthorizedResource;
+        }
+    }
+}
+```
+
+**Использование Policy в Request:**
+```php
+<?php
+// app/Domains/User/Http/Requests/StoreUserRequest.php
+namespace App\Domains\User\Http\Requests;
+
+use Illuminate\Foundation\Http\FormRequest;
+use App\Domains\User\Models\User;
+
+class StoreUserRequest extends FormRequest
+{
+    public function authorize(): bool
+    {
+        // Проверка через Policy (метод create)
+        return $this->user()->can('create', User::class);
+    }
+
+    public function rules(): array
+    {
+        return [
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'email', 'unique:users'],
+            'password' => ['required', 'min:8', 'confirmed'],
+        ];
+    }
+}
+```
+
+#### 3. Middleware авторизации
+Laravel предоставляет встроенные middleware для проверки авторизации.
+
+**Использование в роутах:**
+```php
+<?php
+// routes/api.php
+use Illuminate\Support\Facades\Route;
+use App\Domains\User\Http\Controllers\GetUserController;
+use App\Domains\User\Http\Controllers\DeleteUserController;
+
+// Проверка на аутентификацию
+Route::middleware('auth:api')->group(function () {
+    // Проверка через Gate
+    Route::middleware('can:view-admin-panel')->group(function () {
+        Route::get('/admin/users', [AdminController::class, 'index']);
+    });
+    
+    // Проверка через Policy
+    Route::delete('/users/{user}', DeleteUserController::class)
+         ->middleware('can:delete,user');
+         
+    // Пользователь может редактировать только свой профиль
+    Route::put('/users/{user}', UpdateUserController::class)
+         ->middleware('can:update,user');
+});
+```
+
+#### 4. Проверка авторизации в Blade шаблонах
+```blade
+{{-- resources/views/dashboard.blade.php --}}
+
+@can('update', $user)
+    <button>Edit User</button>
+@elsecan('view', $user)
+    <p>View Only</p>
+@else
+    <p>No Access</p>
+@endcan
+
+@canany(['update', 'delete'], $user)
+    <div>User Management Actions</div>
+@endcanany
+
+@cannot('delete', $user)
+    <p>You cannot delete this user</p>
+@endcannot
+```
+
+#### 5. Расширенная авторизация с ролями и правами
+
+**Создание модели Role и Permission:**
+```php
+<?php
+// app/Domains/Auth/Models/Role.php
+namespace App\Domains\Auth\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+
+class Role extends Model
+{
+    protected $fillable = ['name', 'description'];
+
+    public function permissions(): BelongsToMany
+    {
+        return $this->belongsToMany(Permission::class);
+    }
+
+    public function users(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class);
+    }
+}
+
+<?php
+// app/Domains/Auth/Models/Permission.php
+namespace App\Domains\Auth\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+
+class Permission extends Model
+{
+    protected $fillable = ['name', 'description'];
+
+    public function roles(): BelongsToMany
+    {
+        return $this->belongsToMany(Role::class);
+    }
+}
+```
+
+**Обновление модели User:**
+```php
+<?php
+// app/Domains/User/Models/User.php
+namespace App\Domains\User\Models;
+
+use App\Domains\Auth\Models\Role;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+
+class User extends Authenticatable implements JWTSubject
+{
+    // ... существующий код ...
+
+    public function roles(): BelongsToMany
+    {
+        return $this->belongsToMany(Role::class);
+    }
+
+    public function permissions(): BelongsToMany
+    {
+        return $this->belongsToMany(Permission::class);
+    }
+
+    public function hasRole(string $role): bool
+    {
+        return $this->roles()->where('name', $role)->exists();
+    }
+
+    public function hasPermission(string $permission): bool
+    {
+        return $this->permissions()->where('name', $permission)->exists() ||
+               $this->roles()->whereHas('permissions', function ($query) use ($permission) {
+                   $query->where('name', $permission);
+               })->exists();
+    }
+}
+```
+
+**Gate с проверкой ролей и прав:**
+```php
+<?php
+// app/Providers/AuthServiceProvider.php
+public function boot(): void
+{
+    $this->registerPolicies();
+
+    // Проверка прав через модель Permission
+    Gate::before(function (User $user, string $ability) {
+        if ($user->hasPermission($ability)) {
+            return true;
+        }
+    });
+
+    // Проверка ролей
+    Gate::define('access-admin', function (User $user) {
+        return $user->hasRole('admin');
+    });
+}
+```
+
+### Рекомендации по авторизации:
+
+1. **Используйте Policies для моделей** - организует код лучше, чем Gates
+2. **Проверяйте авторизацию в Request классах** - отделяет логику от контроллеров
+3. **Используйте middleware в роутах** - для глобальных проверок доступа
+4. **Реализуйте роли и права** - для сложных систем с разными уровнями доступа
+5. **Логируйте попытки несанкционированного доступа** - для безопасности
+
+### Пример полного цикла авторизации:
+
+1. **Аутентификация** - пользователь вошел в систему (JWT токен)
+2. **Проверка middleware** - `auth:api` проверяет валидность токена
+3. **Проверка Policy** - `can:update,user` проверяет права на действие
+4. **Выполнение действия** - если все проверки пройдены
+
+---
+
+
